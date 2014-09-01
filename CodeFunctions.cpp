@@ -25,14 +25,79 @@
 //#include <unordered_map>
 //#include <ctgmath>
 
-#define INF 1000000000000000000LL
+#define INF 1000000000
 #define all(c) (c).begin(),(c).end()
 #define tr(c,i) for(typeof((c).begin()) i = (c).begin(); i != (c).end(); ++i)
 
 using namespace std;
 
 typedef pair<int, int> ii;
-typedef pair<int, ii> iii;
+typedef vector<int> vi;
+typedef vector<ii> vii;
+
+/*******************************************
+********************graph*******************
+*******************************************/
+// Union-Find Disjoint Sets Library written in OOP manner, using both path compression and union by rank heuristics
+class UnionFind {                                              // OOP style
+private:
+  vi p, rank, setSize;                       // remember: vi is vector<int>
+  int numSets;
+public:
+  UnionFind(int N) {
+    setSize.assign(N, 1); numSets = N; rank.assign(N, 0);
+    p.assign(N, 0); for (int i = 0; i < N; i++) p[i] = i; }
+  int findSet(int i) { return (p[i] == i) ? i : (p[i] = findSet(p[i])); }
+  bool isSameSet(int i, int j) { return findSet(i) == findSet(j); }
+  void unionSet(int i, int j) { 
+    if (!isSameSet(i, j)) { numSets--; 
+    int x = findSet(i), y = findSet(j);
+    // rank is used to keep the tree short
+    if (rank[x] > rank[y]) { p[y] = x; setSize[x] += setSize[y]; }
+    else                   { p[x] = y; setSize[y] += setSize[x];
+                             if (rank[x] == rank[y]) rank[y]++; } } }
+  int numDisjointSets() { return numSets; }
+  int sizeOfSet(int i) { return setSize[findSet(i)]; }
+};
+
+int kruskal(vector< pair<int, ii> > &EdgeList, int V)
+{
+	sort(EdgeList.begin(), EdgeList.end()); // sort by edge weight O(E log E)
+                      // note: pair object has built-in comparison function
+
+	int mst_cost = 0;
+	UnionFind UF(V);                     // all V are disjoint sets initially
+	for (int i = 0; i < EdgeList.size(); i++) {                      // for each edge, O(E)
+	pair<int, ii> front = EdgeList[i];
+	if (!UF.isSameSet(front.second.first, front.second.second)) {  // check
+		mst_cost += front.first;                // add the weight of e to MST
+		UF.unionSet(front.second.first, front.second.second);    // link them
+	} }                       // note: the runtime cost of UFDS is very light
+
+	return mst_cost;
+}
+
+vi dijkstra(vector<vii> &AdjList, int s)
+{
+  int V = AdjList.size();
+
+  // Dijkstra routine
+  vi dist(V, INF); dist[s] = 0;                    // INF = 1B to avoid overflow
+  priority_queue< ii, vector<ii>, greater<ii> > pq; pq.push(ii(0, s));
+         // ^to sort the pairs by increasing distance from s
+  while (!pq.empty()) {                                             // main loop
+    ii front = pq.top(); pq.pop();     // greedy: pick shortest unvisited vertex
+    int d = front.first, u = front.second;
+    if (d > dist[u]) continue;   // this check is important, see the explanation
+    for (int j = 0; j < (int)AdjList[u].size(); j++) {
+      ii v = AdjList[u][j];                       // all outgoing edges from u
+      if (dist[u] + v.second < dist[v.first]) {
+        dist[v.first] = dist[u] + v.second;                 // relax operation
+        pq.push(ii(dist[v.first], v.first));
+  } } }  // note: this variant can cause duplicate items in the priority queue
+
+  return dist;
+}
 
 /*******************************************
 ***************polynomial stuff*************
@@ -414,58 +479,44 @@ int convertFrom(vector<int> num, int base)
 	return sum;
 }
 
-//binary indexed tree
-typedef vector<int> vi;
-#define LSOne(S) (S & (-S))
+//binary indexed tree - taken from Stanford ACM
+#define LOGSZ 17
 
-class FenwickTree {
-private:
-  vi ft;
+int tree[(1<<LOGSZ)+1];
+int N = (1<<LOGSZ);
 
-public:
-  FenwickTree() {}
-  // initialization: n + 1 zeroes, ignore index 0
-  FenwickTree(int n) { ft.assign(n + 1, 0); }
-
-  int rsq(int b) {                                     // returns RSQ(1, b)
-    int sum = 0; for (; b; b -= LSOne(b)) sum += ft[b];
-    return sum; }
-
-  int rsq(int a, int b) {                              // returns RSQ(a, b)
-    return rsq(b) - (a == 1 ? 0 : rsq(a - 1)); }
-
-  unsigned int log2( unsigned int x )
-	{
-	  unsigned int ans = 0 ;
-	  while( x>>=1 ) ans++;
-	  return ans ;
-	}
-
-  //finds index given cumFre
-  int findG(int cumFre){
-	int idx = 0;
-	int bitMask = pow(2, log2(ft.size()));
-
-	while ((bitMask != 0) && (idx < ft.size())){
-		int tIdx = idx + bitMask;
-		if (tIdx < ft.size() && cumFre >= ft[tIdx]){ 
-		        // if current cumulative frequency is equal to cumFre, 
-		        // we are still looking for higher index (if exists)
-			idx = tIdx;
-			cumFre -= ft[tIdx];
-		}
-		bitMask >>= 1;
-	}
-	if (cumFre != 0)
-		return -1;
-	else
-		return idx;
+// add v to value at x
+void set(int x, int v) {
+  while(x <= N) {
+    tree[x] += v;
+    x += (x & -x);
+  }
 }
 
-  // adjusts value of the k-th element by v (v can be +ve/inc or -ve/dec)
-  void adjust(int k, int v) {                    // note: n = ft.size() - 1
-    for (; k < (int)ft.size(); k += LSOne(k)) ft[k] += v; }
-};
+// get cumulative sum up to and including x
+int get(int x) {
+  int res = 0;
+  while(x) {
+    res += tree[x];
+    x -= (x & -x);
+  }
+  return res;
+}
+
+// get largest value with cumulative sum less than or equal to x;
+// for smallest, pass x-1 and add 1 to result
+int getind(int x) {
+  int idx = 0, mask = N;
+  while(mask && idx < N) {
+    int t = idx + mask;
+    if(x >= tree[t]) {
+      idx = t;
+      x -= tree[t];
+    }
+    mask >>= 1;
+  }
+  return idx;
+}
 
 //trie
 typedef struct trienode
