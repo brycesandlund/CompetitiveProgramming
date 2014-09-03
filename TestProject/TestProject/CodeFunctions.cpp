@@ -12,6 +12,7 @@
 #include <vector>
 #include <algorithm>
 #include <cmath>
+#include <complex>
 #include <cstdlib>
 #include <sstream>
 #include <list>
@@ -22,9 +23,8 @@
 #include <queue>
 #include <tuple>
 #include <functional>
-//#include <unordered_set>
-//#include <unordered_map>
-//#include <ctgmath>
+#include <unordered_set>
+#include <unordered_map>
 
 #define INF 1000000000
 #define all(c) (c).begin(),(c).end()
@@ -35,6 +35,7 @@ using namespace std;
 
 typedef pair<int, int> ii;
 typedef vector<int> vi;
+typedef vector<vi> vvi;
 typedef vector<ii> vii;
 
 /*******************************************
@@ -255,6 +256,41 @@ vi dijkstra(vector<vii> &AdjList, int s)
   } } }  // note: this variant can cause duplicate items in the priority queue
 
   return dist;
+}
+
+// This code performs maximum (cardinality) bipartite matching. - does not support weighted edges, (Hungarian Algorithm)
+//
+// Running time: O(|E| |V|) -- often much faster in practice
+//
+//   INPUT: w[i][j] = edge between row node i and column node j
+//   OUTPUT: mr[i] = assignment for row node i, -1 if unassigned
+//           mc[j] = assignment for column node j, -1 if unassigned
+//           function returns number of matches made
+
+bool FindMatch(int i, const vvi &w, vi &mr, vi &mc, vi &seen) {
+  for (int j = 0; j < w[i].size(); j++) {
+    if (w[i][j] && !seen[j]) {
+      seen[j] = true;
+      if (mc[j] < 0 || FindMatch(mc[j], w, mr, mc, seen)) {
+        mr[i] = j;
+        mc[j] = i;
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+int BipartiteMatching(const vvi &w, vi &mr, vi &mc) {
+  mr = vi(w.size(), -1);
+  mc = vi(w[0].size(), -1);
+  
+  int ct = 0;
+  for (int i = 0; i < w.size(); i++) {
+    vi seen(w[0].size());
+    if (FindMatch(i, w, mr, mc, seen)) ct++;
+  }
+  return ct;
 }
 
 /*******************************************
@@ -748,20 +784,30 @@ vector<int> primeFactorization(int n, vector<int> &primes)
 }
 
 int main() {
-  string s = "GATACAASDFASDFEFWEFASDFSEFSEADFSEFAFESFSDLGKSDFLKNLKSNDLFKSNDASLDKNSLEKFNALKANSFLKNA";
-  strcpy(T, s.c_str());
-  n = s.size();
-  constructSA();
+  vvi adjMatrix;
+  vi row0;
+  row0.push_back(3);
+  row0.push_back(3);
+  row0.push_back(3);
+  adjMatrix.push_back(row0);
 
-  ii results = stringMatching("A");
-  vector<int> spots;
-  for (int i = results.first; i <= results.second; ++i)
-  {
-	  spots.push_back(SA[i]);
-  }
-  sort(spots.begin(), spots.end());
-  cout << spots << endl;
-  cout << results.first << ", " << results.second << endl;
+  vi row1;
+  row1.push_back(3);
+  row1.push_back(2);
+  row1.push_back(3);
+  adjMatrix.push_back(row1);
+
+  vi row2;
+  row2.push_back(3);
+  row2.push_back(3);
+  row2.push_back(2);
+  adjMatrix.push_back(row2);
+
+  vi rows(3, -1), cols(3, -1);
+
+  cout << BipartiteMatching(adjMatrix, rows, cols) << endl;
+  cout << rows << endl;
+  cout << cols << endl;
 
   int asdf;
   cin >> asdf;
