@@ -39,4 +39,4 @@ Icon
 *.opensdf
 
 # Binary files
-/TestProject/Debug/*
+TestProject/TestProject/Debug/

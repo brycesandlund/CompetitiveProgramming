@@ -38,7 +38,7 @@ typedef vector<int> vi;
 typedef vector<ii> vii;
 
 /*******************************************
-********************graph*******************
+***************data structures**************
 *******************************************/
 // Union-Find Disjoint Sets Library written in OOP manner, using both path compression and union by rank heuristics
 class UnionFind {                                              // OOP style
@@ -61,6 +61,162 @@ public:
   int numDisjointSets() { return numSets; }
   int sizeOfSet(int i) { return setSize[findSet(i)]; }
 };
+
+//union-find set: the vector/array contains the parent of each node - lightweight version only implementing path compression from Stanford ACM
+int find(vector <int>& C, int x){return (C[x]==x) ? x : C[x]=find(C, C[x]);} //C++
+
+#define MAX_N 100010                         // second approach: O(n log n)
+char T[MAX_N];
+int n;                                        // the length of input string
+int RA[MAX_N], tempRA[MAX_N];        // rank array and temporary rank array
+int SA[MAX_N], tempSA[MAX_N];    // suffix array and temporary suffix array
+//int c[MAX_N];                                    // for counting/radix sort
+
+void countingSort(int k) {                                          // O(n)
+  int i, sum, maxi = max(300, n);   // up to 255 ASCII chars or length of n
+  vector<int> c(500, 0);
+  for (i = 0; i < n; i++)       // count the frequency of each integer rank
+    c[i + k < n ? RA[i + k] : 0]++;
+  for (i = sum = 0; i < maxi; i++) {
+    int t = c[i]; c[i] = sum; sum += t;
+  }
+  for (i = 0; i < n; i++)          // shuffle the suffix array if necessary
+    tempSA[c[SA[i]+k < n ? RA[SA[i]+k] : 0]++] = SA[i];
+  for (i = 0; i < n; i++)                     // update the suffix array SA
+    SA[i] = tempSA[i];
+}
+
+void constructSA() {         // this version can go up to 100000 characters
+  int i, k, r;
+  for (i = 0; i < n; i++) RA[i] = T[i];                 // initial rankings
+  for (i = 0; i < n; i++) SA[i] = i;     // initial SA: {0, 1, 2, ..., n-1}
+  for (k = 1; k < n; k <<= 1) {       // repeat sorting process log n times
+    countingSort(k);  // actually radix sort: sort based on the second item
+    countingSort(0);          // then (stable) sort based on the first item
+    tempRA[SA[0]] = r = 0;             // re-ranking; start from rank r = 0
+    for (i = 1; i < n; i++)                    // compare adjacent suffixes
+      tempRA[SA[i]] = // if same pair => same rank r; otherwise, increase r
+      (RA[SA[i]] == RA[SA[i-1]] && RA[SA[i]+k] == RA[SA[i-1]+k]) ? r : ++r;
+    for (i = 0; i < n; i++)                     // update the rank array RA
+      RA[i] = tempRA[i];
+    if (RA[SA[n-1]] == n-1) break;               // nice optimization trick
+} }
+
+ii stringMatching(string s) {                      // string matching in O(m log n)
+	int m = s.size();
+	const char *P = s.c_str();
+  int lo = 0, hi = n-1, mid = lo;              // valid matching = [0..n-1]
+  while (lo < hi) {                                     // find lower bound
+    mid = (lo + hi) / 2;                              // this is round down
+    int res = strncmp(T + SA[mid], P, m);  // try to find P in suffix 'mid'
+    if (res >= 0) hi = mid;        // prune upper half (notice the >= sign)
+    else          lo = mid + 1;           // prune lower half including mid
+  }                                      // observe `=' in "res >= 0" above
+  if (strncmp(T + SA[lo], P, m) != 0) return ii(-1, -1);    // if not found
+  ii ans; ans.first = lo;
+  lo = 0; hi = n - 1; mid = lo;
+  while (lo < hi) {            // if lower bound is found, find upper bound
+    mid = (lo + hi) / 2;
+    int res = strncmp(T + SA[mid], P, m);
+    if (res > 0) hi = mid;                              // prune upper half
+    else         lo = mid + 1;            // prune lower half including mid
+  }                           // (notice the selected branch when res == 0)
+  if (strncmp(T + SA[hi], P, m) != 0) hi--;                 // special case
+  ans.second = hi;
+  return ans;
+} // return lower/upperbound as first/second item of the pair, respectively. Inclusive on both ends!!
+
+//binary indexed tree - taken from Stanford ACM
+#define LOGSZ 17
+
+int ft[(1<<LOGSZ)+1];
+int N = (1<<LOGSZ);
+
+// add v to value at x
+void adjust(int x, int v) {
+  while(x <= N) {
+    ft[x] += v;
+    x += (x & -x);
+  }
+}
+
+// get cumulative sum up to and including x
+int rsq(int x) {
+  int res = 0;
+  while(x) {
+    res += ft[x];
+    x -= (x & -x);
+  }
+  return res;
+}
+
+// get largest value with cumulative sum less than or equal to x;
+// for smallest, pass x-1 and add 1 to result
+int getind(int x) {
+  int idx = 0, mask = N;
+  while(mask && idx < N) {
+    int t = idx + mask;
+    if(x >= ft[t]) {
+      idx = t;
+      x -= ft[t];
+    }
+    mask >>= 1;
+  }
+  return idx;
+}
+
+//trie
+typedef struct trienode
+{
+	bool word;
+	trienode *children[26];
+	bool present[26];
+} trienode;
+
+trienode *root;
+
+void init (trienode* node)
+{
+	for (int i = 0; i < 26; ++i)
+	{
+		node->present[i] = false;
+	}
+	node->word = false;
+}
+
+int charToInt(char c)
+{
+	return c - 97;
+}
+
+void add(string word)
+{
+	trienode *cur = root;
+	for (int i = 0; i < word.size(); ++i)
+	{
+		int letter = charToInt(word[i]);
+		if (cur->present[letter])
+		{
+			cur = cur->children[letter];
+		}
+		else
+		{
+			trienode* newNode = (trienode*) malloc(sizeof(trienode));
+			init(newNode);
+			cur->present[letter] = true;
+			cur->children[letter] = newNode;
+			cur = cur->children[letter];
+		}
+		if (i == word.size() - 1)
+		{
+			cur->word = true;
+		}
+	}
+}
+
+/*******************************************
+********************graph*******************
+*******************************************/
 
 int kruskal(vector< pair<int, ii> > &EdgeList, int V)
 {
@@ -481,95 +637,6 @@ int convertFrom(vector<int> num, int base)
 	return sum;
 }
 
-
-//binary indexed tree - taken from Stanford ACM
-#define LOGSZ 17
-
-int ft[(1<<LOGSZ)+1];
-int N = (1<<LOGSZ);
-
-// add v to value at x
-void adjust(int x, int v) {
-  while(x <= N) {
-    ft[x] += v;
-    x += (x & -x);
-  }
-}
-
-// get cumulative sum up to and including x
-int rsq(int x) {
-  int res = 0;
-  while(x) {
-    res += ft[x];
-    x -= (x & -x);
-  }
-  return res;
-}
-
-// get largest value with cumulative sum less than or equal to x;
-// for smallest, pass x-1 and add 1 to result
-int getind(int x) {
-  int idx = 0, mask = N;
-  while(mask && idx < N) {
-    int t = idx + mask;
-    if(x >= ft[t]) {
-      idx = t;
-      x -= ft[t];
-    }
-    mask >>= 1;
-  }
-  return idx;
-}
-
-//trie
-typedef struct trienode
-{
-	bool word;
-	trienode *children[26];
-	bool present[26];
-} trienode;
-
-trienode *root;
-
-void init (trienode* node)
-{
-	for (int i = 0; i < 26; ++i)
-	{
-		node->present[i] = false;
-	}
-	node->word = false;
-}
-
-int charToInt(char c)
-{
-	return c - 97;
-}
-
-void add(string word)
-{
-	trienode *cur = root;
-	for (int i = 0; i < word.size(); ++i)
-	{
-		int letter = charToInt(word[i]);
-		if (cur->present[letter])
-		{
-			cur = cur->children[letter];
-		}
-		else
-		{
-			trienode* newNode = (trienode*) malloc(sizeof(trienode));
-			init(newNode);
-			cur->present[letter] = true;
-			cur->children[letter] = newNode;
-			cur = cur->children[letter];
-		}
-		if (i == word.size() - 1)
-		{
-			cur->word = true;
-		}
-	}
-}
-
 template < typename T>
 void min_max(T &first, T &second)
 {
@@ -681,13 +748,21 @@ vector<int> primeFactorization(int n, vector<int> &primes)
 }
 
 int main() {
-	adjust(4, 4);
-	adjust(8, 10);
-	adjust(5, 3);
+  string s = "GATACAASDFASDFEFWEFASDFSEFSEADFSEFAFESFSDLGKSDFLKNLKSNDLFKSNDASLDKNSLEKFNALKANSFLKNA";
+  strcpy(T, s.c_str());
+  n = s.size();
+  constructSA();
 
-	cout << rsq(5) << endl;
+  ii results = stringMatching("A");
+  vector<int> spots;
+  for (int i = results.first; i <= results.second; ++i)
+  {
+	  spots.push_back(SA[i]);
+  }
+  sort(spots.begin(), spots.end());
+  cout << spots << endl;
+  cout << results.first << ", " << results.second << endl;
 
-	int asdf;
-	cin >> asdf;
-	return 0;
+  int asdf;
+  cin >> asdf;
 }
