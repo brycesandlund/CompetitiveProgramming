@@ -37,6 +37,8 @@ Icon
 
 # VS Temp Files
 *.opensdf
+*.v11.suo
+*.sdf
 
 # Binary files
 TestProject/TestProject/Debug/
