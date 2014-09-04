@@ -39,6 +39,7 @@ typedef vector<vi> vvi;
 typedef vector<ii> vii;
 typedef vector<double> vd;
 typedef vector<vd> vvd;
+typedef long long LL;
 
 /*******************************************
 ***************data structures**************
@@ -296,7 +297,7 @@ int BipartiteMatching(const vvi &w, vi &mr, vi &mc) {
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// Min cost bipartite matching via shortest augmenting paths
+// Min cost bipartite matching via shortest augmenting paths - Hungarian Algorithm
 //
 // This is an O(n^3) implementation of a shortest augmenting path
 // algorithm for finding min cost perfect matchings in dense
@@ -413,6 +414,115 @@ double MinCostMatching(const vvd &cost, vi &Lmate, vi &Rmate) {
   
   return value;
 }
+
+// Adjacency list implementation of FIFO push relabel maximum flow
+// with the gap relabeling heuristic.  This implementation is
+// significantly faster than straight Ford-Fulkerson.  It solves
+// random problems with 10000 vertices and 1000000 edges in a few
+// seconds, though it is possible to construct test cases that
+// achieve the worst-case.
+//
+// Running time:
+//     O(|V|^3)
+//
+// INPUT: 
+//     - graph, constructed using AddEdge()
+//     - source
+//     - sink
+//
+// OUTPUT:
+//     - maximum flow value
+//     - To obtain the actual flow values, look at all edges with
+//       capacity > 0 (zero capacity edges are residual edges).
+
+
+struct Edge {
+  int from, to, cap, flow, index;
+  Edge(int from, int to, int cap, int flow, int index) :
+    from(from), to(to), cap(cap), flow(flow), index(index) {}
+};
+
+struct PushRelabel {
+  int N;
+  vector<vector<Edge> > G;
+  vector<LL> excess;
+  vector<int> dist, active, count;
+  queue<int> Q;
+
+  PushRelabel(int N) : N(N), G(N), excess(N), dist(N), active(N), count(2*N) {}
+
+  void AddEdge(int from, int to, int cap) {
+    G[from].push_back(Edge(from, to, cap, 0, G[to].size()));
+    if (from == to) G[from].back().index++;
+    G[to].push_back(Edge(to, from, 0, 0, G[from].size() - 1));
+  }
+
+  void Enqueue(int v) { 
+    if (!active[v] && excess[v] > 0) { active[v] = true; Q.push(v); } 
+  }
+
+  void Push(Edge &e) {
+    int amt = int(min(excess[e.from], LL(e.cap - e.flow)));
+    if (dist[e.from] <= dist[e.to] || amt == 0) return;
+    e.flow += amt;
+    G[e.to][e.index].flow -= amt;
+    excess[e.to] += amt;    
+    excess[e.from] -= amt;
+    Enqueue(e.to);
+  }
+  
+  void Gap(int k) {
+    for (int v = 0; v < N; v++) {
+      if (dist[v] < k) continue;
+      count[dist[v]]--;
+      dist[v] = max(dist[v], N+1);
+      count[dist[v]]++;
+      Enqueue(v);
+    }
+  }
+
+  void Relabel(int v) {
+    count[dist[v]]--;
+    dist[v] = 2*N;
+    for (int i = 0; i < G[v].size(); i++) 
+      if (G[v][i].cap - G[v][i].flow > 0)
+	dist[v] = min(dist[v], dist[G[v][i].to] + 1);
+    count[dist[v]]++;
+    Enqueue(v);
+  }
+
+  void Discharge(int v) {
+    for (int i = 0; excess[v] > 0 && i < G[v].size(); i++) Push(G[v][i]);
+    if (excess[v] > 0) {
+      if (count[dist[v]] == 1) 
+	Gap(dist[v]); 
+      else
+	Relabel(v);
+    }
+  }
+
+  LL GetMaxFlow(int s, int t) {
+    count[0] = N-1;
+    count[N] = 1;
+    dist[s] = N;
+    active[s] = active[t] = true;
+    for (int i = 0; i < G[s].size(); i++) {
+      excess[s] += G[s][i].cap;
+      Push(G[s][i]);
+    }
+    
+    while (!Q.empty()) {
+      int v = Q.front();
+      Q.pop();
+      active[v] = false;
+      Discharge(v);
+    }
+    
+    LL totflow = 0;
+    for (int i = 0; i < G[s].size(); i++) totflow += G[s][i].flow;
+    return totflow;
+  }
+};
 
 /*******************************************
 ***************polynomial stuff*************
@@ -905,31 +1015,18 @@ vector<int> primeFactorization(int n, vector<int> &primes)
 }
 
 int main() {
-  vvd adjMatrix;
-  vd row0;
-  row0.push_back(3);
-  row0.push_back(3);
-  row0.push_back(3);
-  adjMatrix.push_back(row0);
+	PushRelabel g(10);
+	g.AddEdge(0, 1, 5);
+	g.AddEdge(0, 3, 2);
+	g.AddEdge(1, 3, 2);
+	g.AddEdge(3, 1, 2);
+	g.AddEdge(1, 2, 3);
+	g.AddEdge(3, 4, 4);
+	g.AddEdge(2, 4, 1);
+	g.AddEdge(4, 5, 5);
+	g.AddEdge(2, 5, 2);
+	cout << g.GetMaxFlow(0, 5) << endl;
 
-  vd row1;
-  row1.push_back(3);
-  row1.push_back(2);
-  row1.push_back(3);
-  adjMatrix.push_back(row1);
-
-  vd row2;
-  row2.push_back(3);
-  row2.push_back(3);
-  row2.push_back(2);
-  adjMatrix.push_back(row2);
-
-  vi rows(3, -1), cols(3, -1);
-
-  cout << MinCostMatching(adjMatrix, rows, cols) << endl;
-  cout << rows << endl;
-  cout << cols << endl;
-
-  int asdf;
-  cin >> asdf;
+	int asdf;
+	cin >> asdf;
 }
