@@ -12,6 +12,7 @@
 #include <vector>
 #include <algorithm>
 #include <cmath>
+#include <complex>
 #include <cstdlib>
 #include <sstream>
 #include <list>
@@ -21,17 +22,26 @@
 #include <time.h>
 #include <queue>
 #include <tuple>
-//#include <unordered_set>
-//#include <unordered_map>
-//#include <ctgmath>
+#include <functional>
+#include <unordered_set>
+#include <unordered_map>
 
-#define INF 1000000000000000000LL
+#define INF 1000000000
+#define all(c) (c).begin(),(c).end()
+#define tr(c,i) for(typeof((c).begin()) i = (c).begin(); i != (c).end(); ++i)
+#define EP .00001
 
 using namespace std;
 
-typedef pair<int, pair<int, int> > iii;
+typedef pair<int, int> ii;
+typedef vector<int> vi;
+typedef vector<vi> vvi;
+typedef vector<ii> vii;
+typedef vector<double> vd;
+typedef vector<vd> vvd;
+typedef long long LL;
 
-/*int main() {
+int main() {
 	ofstream out;
 	out.open("coins_game_out.txt");
 	ifstream in("coins_game.txt");
@@ -43,4 +53,4 @@ typedef pair<int, pair<int, int> > iii;
 	}
 	out.close();
 	return 0;
-}*/
+}

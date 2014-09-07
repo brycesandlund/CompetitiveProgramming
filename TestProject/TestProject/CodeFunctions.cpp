@@ -222,21 +222,32 @@ void add(string word)
 ********************graph*******************
 *******************************************/
 
-int kruskal(vector< pair<int, ii> > &EdgeList, int V)
+int kruskal(vector< pair<int, ii> > &EdgeList, int n)
 {
-	sort(EdgeList.begin(), EdgeList.end()); // sort by edge weight O(E log E)
+		sort(EdgeList.begin(), EdgeList.end()); // sort by edge weight O(E log E)
                       // note: pair object has built-in comparison function
 
-	int mst_cost = 0;
-	UnionFind UF(V);                     // all V are disjoint sets initially
-	for (int i = 0; i < EdgeList.size(); i++) {                      // for each edge, O(E)
-	pair<int, ii> front = EdgeList[i];
-	if (!UF.isSameSet(front.second.first, front.second.second)) {  // check
-		mst_cost += front.first;                // add the weight of e to MST
-		UF.unionSet(front.second.first, front.second.second);    // link them
-	} }                       // note: the runtime cost of UFDS is very light
+		int mst_cost = 0;
+		vector<int> UF(n);
+		for (int i = 0; i < n; ++i)
+		{
+			UF[i] = i;
+		}
 
-	return mst_cost;
+		int matched = 0;
+		for (vector<pair<int, ii> >::iterator iter = EdgeList.begin(); iter != EdgeList.end() && matched < n-1; ) {                      // for each edge, O(E)
+			pair<int, ii> front = *iter;
+			if (find(UF, front.second.first) != find(UF, front.second.second)) {  // check
+				mst_cost += front.first;                // add the weight of e to MST
+				UF[front.second.first] = UF[front.second.second];    // link them
+				++matched;
+				iter = EdgeList.erase(iter);
+			}
+			else
+				++iter;
+		}                       // note: the runtime cost of UFDS is very light
+
+		return matched == n-1 ? mst_cost : -1;
 }
 
 vi dijkstra(vector<vii> &AdjList, int s)
@@ -912,6 +923,29 @@ void min_max(T &first, T &second)
 	second = max(tmp, second);
 }
 
+// generates a vector of subsets for the nCr subsets of n
+void subsetsRec(vector<int> &subsets, int curSet, int n, int r)
+{
+	if (n == 0)
+	{
+		subsets.push_back(int(curSet));
+	}
+	else
+	{
+		if (r > 0)
+		{
+			curSet |= 1 << (n-1);
+			subsetsRec(subsets, curSet, n-1, r-1);
+			curSet ^= 1 << (n-1);
+		}
+
+		if (r < n)
+		{
+			subsetsRec(subsets, curSet, n-1, r);
+		}
+	}
+}
+
 /*******************************************
 ******************geometry******************
 *******************************************/
@@ -1015,17 +1049,11 @@ vector<int> primeFactorization(int n, vector<int> &primes)
 }
 
 int main() {
-	PushRelabel g(10);
-	g.AddEdge(0, 1, 5);
-	g.AddEdge(0, 3, 2);
-	g.AddEdge(1, 3, 2);
-	g.AddEdge(3, 1, 2);
-	g.AddEdge(1, 2, 3);
-	g.AddEdge(3, 4, 4);
-	g.AddEdge(2, 4, 1);
-	g.AddEdge(4, 5, 5);
-	g.AddEdge(2, 5, 2);
-	cout << g.GetMaxFlow(0, 5) << endl;
+	vi foo(3, 4);
+	for (vi::reverse_iterator iter = foo.rbegin(); iter != foo.rend(); ++iter)
+	{
+		cout << *iter << endl;
+	}
 
 	int asdf;
 	cin >> asdf;

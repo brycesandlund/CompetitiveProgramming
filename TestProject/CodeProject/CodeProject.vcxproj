@@ -11,8 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{3B681215-3740-4FA5-8AD6-4A99FD430C3A}</ProjectGuid>
-    <RootNamespace>TestProject</RootNamespace>
+    <ProjectGuid>{5BFF177F-8F36-4BA3-8732-C72DDC4C18A6}</ProjectGuid>
+    <RootNamespace>CodeProject</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -62,7 +62,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CodeFunctions.cpp" />
+    <ClCompile Include="PrimPrim.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

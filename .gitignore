@@ -42,4 +42,8 @@ Icon
 
 # Binary files
 TestProject/TestProject/Debug/
+TestProject/TestProject/Release/
 TestProject/Debug/
+TestProject/Release/
+TestProject/CodeProject/Debug/
+TestProject/CodeProject/Release/
