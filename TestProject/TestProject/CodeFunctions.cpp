@@ -989,6 +989,39 @@ double intersectPt(double m1, double b1, double m2, double b2)
 
 */
 
+LL gcd(LL a, LL b)
+{
+	if (b > a)
+		return gcd(b, a);
+	if (b == 0)
+		return a;
+	return gcd(b, a%b);
+}
+
+LL egcd(LL a, LL b, LL &x, LL &y)
+{
+	if (b > a)
+		return egcd(b, a, y, x);
+	if (b == 0)
+	{
+		x = 1;
+		y = 0;
+		return a;
+	}
+	LL ans = egcd(b, a%b, x, y);
+	LL temp = x;
+	x = y;
+	y = temp - (a/b) * y;
+	return ans;
+}
+
+LL inverse(LL a, LL n)
+{
+	LL x, y;
+	egcd(a, n, x, y);
+	return (x+n) % n;
+}
+
 bool isPrime(int n)
 {
 	for (int i = 2; i < sqrt(n); ++i)
@@ -1049,10 +1082,10 @@ vector<int> primeFactorization(int n, vector<int> &primes)
 }
 
 int main() {
-	vi foo(3, 4);
-	for (vi::reverse_iterator iter = foo.rbegin(); iter != foo.rend(); ++iter)
+	int arr[6] = {1, 2, 4, 5, 7, 8};
+	for (int i = 0; i < 6; ++i)
 	{
-		cout << *iter << endl;
+		cout << inverse(arr[i], 9) << endl;
 	}
 
 	int asdf;
