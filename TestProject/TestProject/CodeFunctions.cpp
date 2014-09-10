@@ -35,6 +35,7 @@ using namespace std;
 
 typedef pair<int, int> ii;
 typedef vector<int> vi;
+typedef vector<bool> vb;
 typedef vector<vi> vvi;
 typedef vector<ii> vii;
 typedef vector<double> vd;

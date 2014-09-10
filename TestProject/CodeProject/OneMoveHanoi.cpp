@@ -42,12 +42,42 @@ typedef vector<double> vd;
 typedef vector<vd> vvd;
 typedef long long LL;
 
-int main() {
-	int T;
-	cin >> T;
-	for (int caseNum = 1; caseNum <= T; ++caseNum)
+int caseNum = 1;
+
+LL nmoves(LL n)
+{
+	return (1LL << n) -1;
+}
+
+void move(LL n, char from, char spare, char to, LL moves)
+{
+	LL submoves = nmoves(n-1);
+	if (moves-submoves <= 0)
 	{
-		cout << "Case #" << caseNum << ": ";
+		move(n-1, from, to, spare, moves);
+	}
+	else if (moves-submoves == 1)
+	{
+		printf("Case %d: %lld %c %c\n", caseNum, n, from, to);
+	}
+	else
+	{
+		move(n-1, spare, from, to, moves-submoves-1);
+	}
+}
+
+int main() {
+	for (; ; ++caseNum)
+	{
+		LL k, n;
+		cin >> k >> n;
+
+		if (k == 0 && n == 0)
+		{
+			break;
+		}
+
+		move(n, 'A', 'B', 'C', k);
 	}
 	return 0;
 }
