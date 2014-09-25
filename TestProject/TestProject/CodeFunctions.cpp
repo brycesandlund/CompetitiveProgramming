@@ -656,6 +656,16 @@ vvi matrixA(vvi &A, vvi &B)
 
 	if (A.size() != B.size() || A[0].size() != B[0].size())
 		cerr << "error in matrixA, dimensions do not match" << endl;
+
+	for (int i = 0; i < A.size(); ++i)
+	{
+		for (int j = 0; j < A[0].size(); ++j)
+		{
+			newM[i][j] = A[i][j] + B[i][j];
+		}
+	}
+
+	return newM;
 }
 
 // multiply two matrices
