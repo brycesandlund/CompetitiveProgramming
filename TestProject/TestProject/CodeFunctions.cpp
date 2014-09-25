@@ -650,9 +650,9 @@ long double magnitude(vector<long double> x)
 }
 
 // add two matrices
-vvi matrixA(vvi &A, vvi &B)
+vvi matrixA(vvi A, vvi B)
 {
-	vvi newM(A.size(), A[0].size());
+	vvi newM(A.size(), vi(A[0].size()));
 
 	if (A.size() != B.size() || A[0].size() != B[0].size())
 		cerr << "error in matrixA, dimensions do not match" << endl;
@@ -669,7 +669,7 @@ vvi matrixA(vvi &A, vvi &B)
 }
 
 // multiply two matrices
-vvi matrixM(vvi &A, vvi &B)
+vvi matrixM(vvi A, vvi B)
 {
 	int m = A.size();
 	int n = A[0].size();
@@ -695,7 +695,7 @@ vvi matrixM(vvi &A, vvi &B)
 }
 
 // put matrix to a power using fast exponentiation
-vvi matrixP(vvi &A, int k)
+vvi matrixP(vvi A, int k)
 {
 	if (k == 1)
 		return A;
@@ -707,8 +707,7 @@ vvi matrixP(vvi &A, int k)
 	}
 	else
 	{
-		vvi B = matrixP(A, k-1);
-		return matrixM(B, A);
+		return matrixM(matrixP(A, k-1), A);
 	}
 }
 
