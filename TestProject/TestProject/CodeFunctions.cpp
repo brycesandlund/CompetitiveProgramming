@@ -607,7 +607,7 @@ long double polyAt(vector<long double> poly, long double x)
 }
 
 /*******************************************
-***************vector geometry**************
+******vector geometry/ linear algebra*******
 *******************************************/
 
 long double dotProd(vector<long double> one, vector<long double> two)
@@ -647,6 +647,59 @@ long double magnitude(vector<long double> x)
 		sum += x[i] * x[i];
 	}
 	return sqrt(sum);
+}
+
+// add two matrices
+vvi matrixA(vvi &A, vvi &B)
+{
+	vvi newM(A.size(), A[0].size());
+
+	if (A.size() != B.size() || A[0].size() != B[0].size())
+		cerr << "error in matrixA, dimensions do not match" << endl;
+}
+
+// multiply two matrices
+vvi matrixM(vvi &A, vvi &B)
+{
+	int m = A.size();
+	int n = A[0].size();
+	int q = B[0].size();
+
+	vvi newM(m, vi(q, 0));
+
+	if (B.size() != n)
+		cerr << "error in matrixM, dimensions do not match" << endl;
+
+	for (int i = 0; i < m; ++i)
+	{
+		for (int j = 0; j < q; ++j)
+		{
+			for (int k = 0; k < n; ++k)
+			{
+				newM[i][j] = (newM[i][j] + A[i][k] * B[k][j]);
+			}
+		}
+	}
+
+	return newM;
+}
+
+// put matrix to a power using fast exponentiation
+vvi matrixP(vvi &A, int k)
+{
+	if (k == 1)
+		return A;
+
+	if (k % 2 == 0)
+	{
+		vvi B = matrixP(A, k/2);
+		return matrixM(B, B);
+	}
+	else
+	{
+		vvi B = matrixP(A, k-1);
+		return matrixM(B, A);
+	}
 }
 
 //returns the value of t where the 3-dimensional line from x1 to x2 has shortest distance to point x0
