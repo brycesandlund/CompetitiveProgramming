@@ -29,7 +29,7 @@
 #define INF 1000000000
 #define all(c) (c).begin(),(c).end()
 #define tr(c,i) for(typeof((c).begin()) i = (c).begin(); i != (c).end(); ++i)
-#define EP .00001
+#define EP .000000001
 
 using namespace std;
 
@@ -44,10 +44,58 @@ typedef vector<vd> vvd;
 typedef long long LL;
 
 int main() {
-	int T;
-	cin >> T;
-	for (int caseNum = 1; caseNum <= T; ++caseNum)
+	int N;
+	cin >> N;
+	for (int caseNum = 1; caseNum <= N; ++caseNum)
 	{
+		int n;
+		cin >> n;
+		vvd dist(n, vd(n, INF));
+		vii towns;
+		for (int i = 0; i < n; ++i)
+		{
+			int x, y;
+			cin >> x >> y;
+			towns.push_back(ii(x, y));
+		}
+
+		for (int i = 0; i < n; ++i)
+		{
+			for (int j = 0; j < n; ++j)
+			{
+				double curd = hypot(towns[i].first - towns[j].first, towns[i].second - towns[j].second);
+				if (curd < 10 + EP)
+				{
+					dist[i][j] = curd;
+				}
+			}
+			dist[i][i] = 0;
+		}
+
+		for (int k = 0; k < n; ++k)
+			for (int i = 0; i < n; ++i)
+				for (int j = 0; j < n; ++j)
+					dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]);
+
+		double maxd = -1;
+		for (int i = 0; i < n; ++i)
+		{
+			for (int j = 0; j < n; ++j)
+			{
+				maxd = max(maxd, dist[i][j]);
+			}
+		}
+
+		printf("Case #%d:\n", caseNum);
+		if (maxd == INF)
+		{
+			cout << "Send Kurdy" << endl;
+		}
+		else
+		{
+			printf("%.4f\n", maxd);
+		}
+		cout << endl;
 	}
 	return 0;
 }

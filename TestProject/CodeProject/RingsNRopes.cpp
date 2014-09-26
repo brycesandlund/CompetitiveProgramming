@@ -37,17 +37,58 @@ typedef pair<int, int> ii;
 typedef vector<int> vi;
 typedef vector<bool> vb;
 typedef vector<vi> vvi;
-typedef vector<vb> vvb;
 typedef vector<ii> vii;
 typedef vector<double> vd;
 typedef vector<vd> vvd;
 typedef long long LL;
 
 int main() {
-	int T;
-	cin >> T;
-	for (int caseNum = 1; caseNum <= T; ++caseNum)
+	int N;
+	cin >> N;
+	for (int caseNum = 1; caseNum <= N; ++caseNum)
 	{
+		int n, m;
+		cin >> n >> m;
+		vvi dist(n, vi(n, INF));
+		vii edgeList;
+		for (int i = 0; i < m; ++i)
+		{
+			int u, v;
+			cin >> u >> v;
+			edgeList.push_back(ii(u, v));
+			dist[u][v] = dist[v][u] = 1;
+		}
+
+		for (int i = 0; i < n; ++i)
+			dist[i][i] = 0;
+
+		for (int k = 0; k < n; ++k)
+			for (int i = 0; i < n; ++i)
+				for (int j = 0; j < n; ++j)
+					dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]);
+
+		int maxRopes = -1;
+		for (int i = 0; i < n; ++i)
+		{
+			for (int j = i+1; j < n; ++j)
+			{
+				int curRopes = 0;
+				for (int k = 0; k < edgeList.size(); ++k)
+				{
+					int u = edgeList[k].first;
+					int v = edgeList[k].second;
+
+					if (dist[i][u]+1+dist[v][j] == dist[i][j] || dist[i][v]+1+dist[u][j] == dist[i][j])
+					{
+						++curRopes;
+					}
+				}
+
+				maxRopes = max(maxRopes, curRopes);
+			}
+		}
+
+		printf("Case #%d: %d\n", caseNum, maxRopes);
 	}
 	return 0;
 }

@@ -38,6 +38,7 @@ typedef vector<int> vi;
 typedef vector<bool> vb;
 typedef vector<vi> vvi;
 typedef vector<ii> vii;
+typedef vector<vb> vvb;
 typedef vector<double> vd;
 typedef vector<vd> vvd;
 typedef long long LL;
@@ -223,12 +224,12 @@ void add(string word)
 ********************graph*******************
 *******************************************/
 
-int kruskal(vector< pair<int, ii> > &EdgeList, int n)
+double kruskal(vector<pair<double, ii> > &EdgeList, int n)
 {
 		sort(EdgeList.begin(), EdgeList.end()); // sort by edge weight O(E log E)
                       // note: pair object has built-in comparison function
 
-		int mst_cost = 0;
+		double mst_cost = 0;
 		vector<int> UF(n);
 		for (int i = 0; i < n; ++i)
 		{
@@ -236,17 +237,16 @@ int kruskal(vector< pair<int, ii> > &EdgeList, int n)
 		}
 
 		int matched = 0;
-		for (vector<pair<int, ii> >::iterator iter = EdgeList.begin(); iter != EdgeList.end() && matched < n-1; ) {                      // for each edge, O(E)
-			pair<int, ii> front = *iter;
-			if (find(UF, front.second.first) != find(UF, front.second.second)) {  // check
+		for (vector<pair<double, ii> >::iterator iter = EdgeList.begin(); iter != EdgeList.end() && matched < n-1; ) {                      // for each edge, O(E)
+			pair<double, ii> front = *iter;
+			int x = find(UF, front.second.first), y = find(UF, front.second.second);
+			if (x != y) {  // check
 				mst_cost += front.first;                // add the weight of e to MST
-				UF[front.second.first] = UF[front.second.second];    // link them
+				UF[x] = UF[y];    // link them
 				++matched;
-				iter = EdgeList.erase(iter);
-			}
-			else
-				++iter;
-		}                       // note: the runtime cost of UFDS is very light
+			}        // note: the runtime cost of UFDS is very light
+			++iter;
+		}
 
 		return matched == n-1 ? mst_cost : -1;
 }
@@ -535,6 +535,30 @@ struct PushRelabel {
     return totflow;
   }
 };
+
+//expects adjList pairs in the form (v, w), where v is vertex and w is weight
+pair<bool, vi> bellmanFord(vector<vii> &AdjList, int s)
+{
+	int V = AdjList.size();
+// Bellman Ford routine
+  vi dist(V, INF); dist[s] = 0;
+  for (int i = 0; i < V - 1; i++)  // relax all E edges V-1 times, overall O(VE)
+    for (int u = 0; u < V; u++)                        // these two loops = O(E)
+      for (int j = 0; j < (int)AdjList[u].size(); j++) {
+        ii v = AdjList[u][j];        // we can record SP spanning here if needed
+        dist[v.first] = min(dist[v.first], dist[u] + v.second);         // relax
+      }
+
+  bool hasNegativeCycle = false;
+  for (int u = 0; u < V; u++)                          // one more pass to check
+    for (int j = 0; j < (int)AdjList[u].size(); j++) {
+      ii v = AdjList[u][j];
+      if (dist[v.first] > dist[u] + v.second)                 // should be false
+        hasNegativeCycle = true;     // but if true, then negative cycle exists!
+    }
+	return make_pair(hasNegativeCycle, dist);
+
+}
 
 /*******************************************
 ***************polynomial stuff*************

@@ -44,10 +44,44 @@ typedef vector<vd> vvd;
 typedef long long LL;
 
 int main() {
-	int T;
-	cin >> T;
-	for (int caseNum = 1; caseNum <= T; ++caseNum)
+	int caseNum = 1;
+	while (true)
 	{
+		int C, S, Q;
+		cin >> C >> S >> Q;
+		if (C == 0 && S == 0 && Q == 0)
+			break;
+
+		if (caseNum > 1)
+			cout << endl;
+
+		vvi decibal(C, vi(C, INF));
+		for (int i = 0; i < S; ++i)
+		{
+			int c1, c2, d;
+			cin >> c1 >> c2 >> d;
+			decibal[c1-1][c2-1] = d;
+			decibal[c2-1][c1-1] = d;
+		}
+
+		for (int i = 0; i < C; ++i)
+			decibal[i][i] = 0;
+
+		for (int k = 0; k < C; ++k)
+			for (int i = 0; i < C; ++i)
+				for (int j = 0; j < C; ++j)
+					decibal[i][j] = min(decibal[i][j], max(decibal[i][k], decibal[k][j]));
+
+		printf("Case #%d\n", caseNum++);
+		for (int i = 0; i < Q; ++i)
+		{
+			int u, v;
+			cin >> u >> v;
+			if (decibal[u-1][v-1] == INF)
+				cout << "no path" << endl;
+			else
+				cout << decibal[u-1][v-1] << endl;
+		}
 	}
 	return 0;
 }
