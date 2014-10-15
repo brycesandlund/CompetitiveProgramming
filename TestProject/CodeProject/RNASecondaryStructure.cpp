@@ -2,7 +2,6 @@
 #include <vector>
 #include <cstdio>
 #include <sstream>
-#include <algorithm>
 #include <string>
 
 using namespace std;
@@ -12,7 +11,6 @@ typedef vector<char> vc;
 typedef vector<vi> vvi;
 typedef vector<vvi> vvvi;
 
-vc letters;
 int K;
 vvvi MEMO;
 
@@ -22,66 +20,38 @@ void match(char a, char b, bool &matchAU, bool& matchCG)
 	matchCG = a == 'C' && b == 'G' || a == 'G' && b == 'C';
 }
 
-vi solve(int start, int end)
+int solve(int start, int end, int k, vc &letters)
 {
 	if (start >= end)
-		return vi(1, 0);
+		return 0;
 
-	if (!MEMO[start][end].empty())
-		return MEMO[start][end];
+	if (MEMO[start][end][k] != -1)
+		return MEMO[start][end][k];
 
 	bool matchAU, matchCG;
 	match(letters[start], letters[end], matchAU, matchCG);
 
-	vi best;
+	int best = 0;
 	if (matchAU)
 	{
-		best = solve(start+1, end-1);
-		for (int i = 0; i < best.size(); ++i)
-		{
-			++best[i];
-		}
+		best = 1 + solve(start+1, end-1, k, letters);
 	}
 	else if (matchCG)
 	{
-		best = solve(start+1, end-1);
-		if (best.size() <= K)
-		{
-			best.push_back(best.back()+1);
-		}
+		best = min(k, 1) + solve(start+1, end-1, max(k-1, 0), letters);
 	}
 	else
 	{
 		for (int i = start; i < end; ++i)
 		{
-			vi left = solve(start, i);
-			vi right = solve(i+1, end);
-
-			vi curBest(min(K+1, (int)(left.size() + right.size() - 1)), -1);
-			
-			for (int j = 0; j < left.size(); ++j)
+			for (int j = 0; j <= k; ++j)
 			{
-				for (int k = 0; k < min(K-j+1, (int)right.size()); ++k)
-				{
-					curBest[j+k] = max(curBest[j+k], left[j]+right[k]);
-				}
-			}
-
-			for (int j = 0; j < curBest.size(); ++j)
-			{
-				if (j == best.size())
-				{
-					best.push_back(curBest[j]);
-				}
-				else
-				{
-					best[j] = max(best[j], curBest[j]);
-				}
+				best = max(best, solve(start, i, j, letters) + solve(i+1, end, k-j, letters));
 			}
 		}
 	}
 
-	return MEMO[start][end] = best;
+	return MEMO[start][end][k] = best;
 }
 
 int main()
@@ -145,18 +115,33 @@ int main()
 		counts[0] = min(counts[0], 26);
 		counts[counts.size()-1] = min(counts[counts.size()-1], 26);
 
-		letters.clear();
-		for (int i = 0; i < lettersRL.size(); ++i)
+		vc lettersMid;
+		for (int i = 1; i < lettersRL.size()-1; ++i)
 		{
 			for (int j = 0; j < counts[i]; ++j)
 			{
-				letters.push_back(lettersRL[i]);
+				lettersMid.push_back(lettersRL[i]);
 			}
 		}
 
-		MEMO = vvvi(letters.size(), vvi(letters.size()));
-		vi sol = solve(0, letters.size()-1);
-		nMatches += *max_element(sol.begin(), sol.end());
+		int intervalM = 0;
+		vc letters(lettersMid);
+		for (int j = 0; j < counts[0]; ++j)
+		{
+			letters.insert(letters.begin(), lettersRL[0]);
+		}
+		MEMO = vvvi(letters.size(), vvi(letters.size(), vi(K+1, -1)));
+		intervalM = solve(0, letters.size()-1, K, letters);
+
+		letters = vc(lettersMid);
+		for (int j = 0; j < counts.back(); ++j)
+		{
+			letters.push_back(lettersRL.back());
+		}
+		MEMO = vvvi(letters.size(), vvi(letters.size(), vi(K+1, -1)));
+		intervalM = max(intervalM, solve(0, letters.size()-1, K, letters));
+
+		nMatches += intervalM;
 		printf("Case %d: %d\n", caseNum, nMatches);
 	}
 }
