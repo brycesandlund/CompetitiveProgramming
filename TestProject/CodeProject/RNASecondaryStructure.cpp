@@ -13,6 +13,7 @@ typedef vector<vvi> vvvi;
 
 int K;
 vvvi MEMO;
+vc letters;
 
 void match(char a, char b, bool &matchAU, bool& matchCG)
 {
@@ -20,7 +21,29 @@ void match(char a, char b, bool &matchAU, bool& matchCG)
 	matchCG = a == 'C' && b == 'G' || a == 'G' && b == 'C';
 }
 
-int solve(int start, int end, int k, vc &letters)
+int solve(int start, int end, int k);
+
+vi getSolVector(int start, int end, int k)
+{
+	vi sol(1);
+	sol[0] = solve(start, end, 0);
+	for (int i = 1; i <= k; ++i)
+	{
+		int newS = solve(start, end, i);
+		if (newS != sol[i-1])
+		{
+			sol.push_back(newS);
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	return sol;
+}
+
+int solve(int start, int end, int k)
 {
 	if (start >= end)
 		return 0;
@@ -34,19 +57,24 @@ int solve(int start, int end, int k, vc &letters)
 	int best = 0;
 	if (matchAU)
 	{
-		best = 1 + solve(start+1, end-1, k, letters);
+		best = 1 + solve(start+1, end-1, k);
 	}
 	else if (matchCG)
 	{
-		best = min(k, 1) + solve(start+1, end-1, max(k-1, 0), letters);
+		best = min(k, 1) + solve(start+1, end-1, max(k-1, 0));
 	}
 	else
 	{
 		for (int i = start; i < end; ++i)
 		{
+			vi left = getSolVector(start, i, k);
+			vi right = getSolVector(i+1, end, k);
+
 			for (int j = 0; j <= k; ++j)
 			{
-				best = max(best, solve(start, i, j, letters) + solve(i+1, end, k-j, letters));
+				int leftCur = j >= left.size() ? left.back() : left[j];
+				int rightCur = k-j >= right.size() ? right.back() : right[k-j];
+				best = max(best, leftCur + rightCur);
 			}
 		}
 	}
@@ -125,13 +153,13 @@ int main()
 		}
 
 		int intervalM = 0;
-		vc letters(lettersMid);
+		letters = vc(lettersMid);
 		for (int j = 0; j < counts[0]; ++j)
 		{
 			letters.insert(letters.begin(), lettersRL[0]);
 		}
 		MEMO = vvvi(letters.size(), vvi(letters.size(), vi(K+1, -1)));
-		intervalM = solve(0, letters.size()-1, K, letters);
+		intervalM = solve(0, letters.size()-1, K);
 
 		letters = vc(lettersMid);
 		for (int j = 0; j < counts.back(); ++j)
@@ -139,7 +167,7 @@ int main()
 			letters.push_back(lettersRL.back());
 		}
 		MEMO = vvvi(letters.size(), vvi(letters.size(), vi(K+1, -1)));
-		intervalM = max(intervalM, solve(0, letters.size()-1, K, letters));
+		intervalM = max(intervalM, solve(0, letters.size()-1, K));
 
 		nMatches += intervalM;
 		printf("Case %d: %d\n", caseNum, nMatches);
