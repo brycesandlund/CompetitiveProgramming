@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="SpeedyEscapeDijkstra.cpp">
+    <ClCompile Include="RNASecondaryStructure.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

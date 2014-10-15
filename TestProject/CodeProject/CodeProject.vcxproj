@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="SpeedyEscapeDijkstra.cpp" />
+    <ClCompile Include="RNASecondaryStructure.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5BFF177F-8F36-4BA3-8732-C72DDC4C18A6}</ProjectGuid>
