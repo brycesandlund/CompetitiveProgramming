@@ -735,6 +735,40 @@ vvi matrixP(vvi A, int k)
 	}
 }
 
+// Given an n-by-n integer matrix A, compute det(A) mod M, where M
+// can be an arbitrary positive integer.
+// The return value will be in the range [0, M) regardless of the
+// sign of det(A).
+// Complexity: O(n^3 logM).
+int det(const int* matrix, int n, int M) {
+    vector<vector<long long> > A;
+    for (int i = 0; i < n; ++i)
+        A.push_back(vector<long long>(matrix + i * n,
+                    matrix + (i + 1) * n));
+    for (int i = 0; i < n; ++i)
+        for (int j = 0; j < n; ++j)
+            A[i][j] %= M;
+    long long ans = 1;
+    for (int i = 0; i < n; ++i) {
+        for (int j = i + 1; j < n; ++j) {
+            while (A[j][i] != 0) {
+                int t = A[i][i] / A[j][i];
+                for (int k = i; k < n; ++k) {
+                    A[i][k] -= t * A[j][k];
+                    A[i][k] %= M;
+                }
+                swap(A[i], A[j]);
+                ans *= -1;
+            }
+        }
+        if (A[i][i] == 0)
+            return 0;
+        ans *= A[i][i];
+        ans %= M;
+    }
+    return ans < 0 ? ans + M : ans;
+}
+
 //returns the value of t where the 3-dimensional line from x1 to x2 has shortest distance to point x0
 //note: for this to work, x1 should be the point where t = 0 and x2 where t = 1
 long double time(vector<long double> x0, vector<long double> x1, vector<long double> x2)
