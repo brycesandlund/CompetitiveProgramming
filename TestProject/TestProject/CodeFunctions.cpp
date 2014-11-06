@@ -1290,6 +1290,67 @@ vector<int> primeFactorization(int n, vector<int> &primes)
 	return factors;
 }
 
+LL g(LL x, LL n, LL b)
+{
+	return mult_mod(x, x, n) + b;
+}
+
+LL pollard_rho(LL n, LL start, LL b)
+{
+	LL x = start, y = start, d = 1;
+	while (d == 1)
+	{
+		x = g(x, n, b);
+		y = g(g(y, n, b), n, b);
+		d = gcd(abs(x-y), n);
+	}
+
+	return d;
+}
+
+vector<LL> prime_factor_smart(LL n)
+{
+	vector<LL> factors;
+
+	long long small_primes[] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37};
+	if (n <= 37*37)
+	{
+		for (int i = 0; i < 12; ++i)
+		{
+			while (n % small_primes[i] == 0)
+			{
+				factors.push_back(small_primes[i]);
+				n /= small_primes[i];
+			}
+		}
+
+		return factors;
+	}
+
+	if (is_prime(n))
+	{
+		factors.push_back(n);
+		return factors;
+	}
+	else
+	{
+		LL factor;
+		while (true)
+		{
+			factor = pollard_rho(n, rand()%10, rand()%10);
+
+			if (factor != n)
+				break;
+		}
+
+		vector<LL> fact1 = prime_factor_smart(n / factor);
+		vector<LL> fact2 = prime_factor_smart(factor);
+
+		fact1.insert(fact1.end(), fact2.begin(), fact2.end());
+		return fact1;
+	}
+}
+
 int main() {
 	int arr[6] = {1, 2, 4, 5, 7, 8};
 	for (int i = 0; i < 6; ++i)
