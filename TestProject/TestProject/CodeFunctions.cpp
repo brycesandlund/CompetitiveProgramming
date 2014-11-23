@@ -735,6 +735,40 @@ vvi matrixP(vvi A, int k)
 	}
 }
 
+// Given an n-by-n integer matrix A, compute det(A) mod M, where M
+// can be an arbitrary positive integer.
+// The return value will be in the range [0, M) regardless of the
+// sign of det(A).
+// Complexity: O(n^3 logM).
+int det(const int* matrix, int n, int M) {
+    vector<vector<long long> > A;
+    for (int i = 0; i < n; ++i)
+        A.push_back(vector<long long>(matrix + i * n,
+                    matrix + (i + 1) * n));
+    for (int i = 0; i < n; ++i)
+        for (int j = 0; j < n; ++j)
+            A[i][j] %= M;
+    long long ans = 1;
+    for (int i = 0; i < n; ++i) {
+        for (int j = i + 1; j < n; ++j) {
+            while (A[j][i] != 0) {
+                int t = A[i][i] / A[j][i];
+                for (int k = i; k < n; ++k) {
+                    A[i][k] -= t * A[j][k];
+                    A[i][k] %= M;
+                }
+                swap(A[i], A[j]);
+                ans *= -1;
+            }
+        }
+        if (A[i][i] == 0)
+            return 0;
+        ans *= A[i][i];
+        ans %= M;
+    }
+    return ans < 0 ? ans + M : ans;
+}
+
 //returns the value of t where the 3-dimensional line from x1 to x2 has shortest distance to point x0
 //note: for this to work, x1 should be the point where t = 0 and x2 where t = 1
 long double time(vector<long double> x0, vector<long double> x1, vector<long double> x2)
@@ -1123,20 +1157,20 @@ bool isPrime(int n)
 
 vector<int> primesToN(int n)
 {
-	vector<bool> sieve(n, true);
+	vector<bool> sieve(n+1, true);
 	vector<int> numbers;
 	for (int i = 2; i <= sqrt(n)+EP; ++i)
 	{
 		if (sieve[i])
 		{
-			for (int j = i+i; j < n; j += i)
+			for (int j = i+i; j <= n; j += i)
 			{
 				sieve[j] = false;
 			}
 		}
 	}
 
-	for (int i = 2; i < n; ++i)
+	for (int i = 2; i <= n; ++i)
 	{
 		if (sieve[i])
 		{
@@ -1147,6 +1181,94 @@ vector<int> primesToN(int n)
 	return numbers;
 }
 
+vector<bool> segSieve(LL start, LL end)
+{
+    vector<int> primes = primesToN((int)(sqrt(end)+EP));
+
+    vector<bool> sieve(end-start+1, true);
+    
+    if (start <= 1)
+        sieve[0] = false;
+
+    if (start == 0)
+        sieve[1] = false;
+
+    for (int i = 0; i < (int)primes.size(); ++i)
+    {
+        for (LL j = primes[i] * max((start + primes[i]-1)/primes[i], 2LL); j <= end; j += primes[i])
+        {
+            sieve[j-start] = false;
+        }
+    }
+
+    return sieve;
+
+    /*vector<ll> numbers;
+    for (int i = 0; i < sieve.size(); ++i)
+    {
+        numbers.push_back(sieve[i]+start);
+    }
+
+    return numbers;
+    */
+}
+
+long long mult_mod(long long a, long long b, long long m) {
+    long long q;
+    long long r;
+    asm(
+            "mulq %3;"
+            "divq %4;"
+            : "=a"(q), "=d"(r)
+            : "a"(a), "rm"(b), "rm"(m));
+    return r;
+}
+
+/* Computes a^b mod m. Assumes 1 <= m <= 2^62-1 and 0^0=1.
+ * The return value will always be in [0, m) regardless of the sign of a.
+ */
+long long pow_mod(long long a, long long b, long long m) {
+    if (b == 0) return 1 % m;
+    if (b == 1) return a < 0 ? a % m + m : a % m;
+    long long t = pow_mod(a, b / 2, m);
+    t = mult_mod(t, t, m);
+    if (b % 2) t = mult_mod(t, a, m);
+    return t >= 0 ? t : t + m;
+}
+
+/* A deterministic implementation of Miller-Rabin primality test.
+ * This implementation is guaranteed to give the right result for n < 2^64
+ * by using a 7-number magic base.
+ * Alternatively, the base can be replaced with the first 12 prime numbers
+ * (prime numbers <= 37) and still working correctly.
+ */
+bool is_prime(long long n) {
+    long long small_primes[] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37};
+    for (int i = 0; i < 12; ++i)
+        if (n > small_primes[i] && n % small_primes[i] == 0)
+            return false;
+    long long base[] = {2, 325, 9375, 28178, 450775, 9780504, 1795265022};
+    long long d = n - 1;
+    int s = 0;
+    for (; d % 2 == 0; d /= 2, ++s);
+    for (int i = 0; i < 7; ++i) {
+        long long a = base[i] % n;
+        if (a == 0) continue;
+        long long t = pow_mod(a, d, n);
+        if (t == 1 || t == n - 1) continue;
+        bool found = false;
+        for (int r = 1; r < s; ++r) {
+            t = pow_mod(t, 2, n);
+            if (t == n - 1) {
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+            return false;
+    }
+    return true;
+}
 
 
 vector<int> primeFactorization(int n, vector<int> &primes)
@@ -1166,6 +1288,67 @@ vector<int> primeFactorization(int n, vector<int> &primes)
 		factors.push_back(n);
 	}
 	return factors;
+}
+
+LL g(LL x, LL n, LL b)
+{
+	return mult_mod(x, x, n) + b;
+}
+
+LL pollard_rho(LL n, LL start, LL b)
+{
+	LL x = start, y = start, d = 1;
+	while (d == 1)
+	{
+		x = g(x, n, b);
+		y = g(g(y, n, b), n, b);
+		d = gcd(abs(x-y), n);
+	}
+
+	return d;
+}
+
+vector<LL> prime_factor_smart(LL n)
+{
+	vector<LL> factors;
+
+	long long small_primes[] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37};
+	if (n <= 37*37)
+	{
+		for (int i = 0; i < 12; ++i)
+		{
+			while (n % small_primes[i] == 0)
+			{
+				factors.push_back(small_primes[i]);
+				n /= small_primes[i];
+			}
+		}
+
+		return factors;
+	}
+
+	if (is_prime(n))
+	{
+		factors.push_back(n);
+		return factors;
+	}
+	else
+	{
+		LL factor;
+		while (true)
+		{
+			factor = pollard_rho(n, rand()%10, rand()%10);
+
+			if (factor != n)
+				break;
+		}
+
+		vector<LL> fact1 = prime_factor_smart(n / factor);
+		vector<LL> fact2 = prime_factor_smart(factor);
+
+		fact1.insert(fact1.end(), fact2.begin(), fact2.end());
+		return fact1;
+	}
 }
 
 int main() {
