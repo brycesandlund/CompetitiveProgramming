@@ -4,7 +4,8 @@
 
 using namespace std;
 
-typedef vector<size_t> VI;
+typedef long long LL;
+typedef vector<LL> vi;
 
 int main()
 {
@@ -13,23 +14,25 @@ int main()
     cin >> T;
     for (size_t caseNum = 1; caseNum <= T; ++caseNum)
     {
-        size_t N, K;
+        size_t N;
+        LL K;
     
         cin >> N >> K;
 
-        VI A(N), B(N);
+        vi A(N);
 
         for (size_t i = 0; i < N; ++i)
         {
             cin >> A[i];
         }
 
-        size_t maxProfit = 0;
+        LL maxProfit = 0;
         for (size_t i = 0; i < N; ++i)
         {
-            cin >> B[i];
+            LL bi;
+            cin >> bi;
 
-            size_t cur = K / A[i] * B[i];
+            LL cur = K / A[i] * bi;
             maxProfit = max(maxProfit, cur);
         }
 

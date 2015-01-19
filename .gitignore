@@ -50,3 +50,6 @@ TestProject/CodeProject/Release/
 *.exe
 Eclipse/.metadata/
 *.class
+# Mac's garbage
+*.dSYM
+*.swp
