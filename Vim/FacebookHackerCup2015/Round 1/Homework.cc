@@ -18,9 +18,9 @@ int main()
 
     vi sieve(N, 0);
     
-    for (ll i = 2; i <= sqrt(N)+EP; ++i)
+    for (ll i = 2; i < N; ++i)
         if (sieve[i] == 0)
-            for (ll j = i; j <= N; j += i)
+            for (ll j = i; j < N; j += i)
                 ++sieve[j];
 
     for (ll caseNum = 1; caseNum <= T; ++caseNum)

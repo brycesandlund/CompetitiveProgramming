@@ -109,6 +109,12 @@ int main()
         }
 
         processAll();
+
+        for (ll i = 0; i < N; ++i)
+        {
+            if (bestSum[i] <= 0)
+                cerr << "best sum negative" << endl;
+        }
         printf("Case #%lld: %lld\n", caseNum, bestSum[0]);
     }
 }
