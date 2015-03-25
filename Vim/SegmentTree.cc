@@ -16,8 +16,7 @@ struct SegmentNode {
     // update data
     ll updateVal;
 
-    SegmentNode(ll L, ll R, ll maxVal) : L(L), R(R), maxVal(maxVal) 
-    {
+    SegmentNode(ll L, ll R, ll maxVal) : L(L), R(R), maxVal(maxVal) {
         // initialize update values to no updates necessary
         updateVal = 0;
     }
@@ -34,14 +33,6 @@ struct SegmentTree {
     // create merging function here
     SegmentNode merge(SegmentNode &left, SegmentNode &right) {
         return SegmentNode(left.L, right.R, max(left.maxVal, right.maxVal));
-    }
-
-    void updateChildren(ll cur) {
-        rangeUpdate(left(cur), st[cur].L, st[cur].R, st[cur].updateVal);
-        rangeUpdate(right(cur), st[cur].L, st[cur].R, st[cur].updateVal);
-
-        // reset update vals
-        st[cur].updateVal = 0;
     }
 
     // merge handles all querying, no changes needed here
@@ -96,6 +87,14 @@ struct SegmentTree {
         }
     }
 
+    void updateChildren(ll cur) {
+        rangeUpdate(left(cur), st[cur].L, st[cur].R, st[cur].updateVal);
+        rangeUpdate(right(cur), st[cur].L, st[cur].R, st[cur].updateVal);
+
+        // reset update vals
+        st[cur].updateVal = 0;
+    }
+
     void build(ll cur, ll L, ll R, vi &A) {
         if (L == R) {
             // initialize single value here
@@ -121,7 +120,7 @@ int main() {
 
     vi A(vals, vals+N);
 
-    SegmentTree tree(A);
+   SegmentTree tree(A);
 
     bool testLazy = true;
 
