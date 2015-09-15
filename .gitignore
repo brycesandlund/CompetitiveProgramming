@@ -1,6 +1,7 @@
 # Ignore files without extension
 *
-!*.*
+*.*
+!ICPC_Training_Solutions_2015/*
 
 # Windows image file caches
 Thumbs.db
