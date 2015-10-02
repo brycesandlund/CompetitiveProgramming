@@ -17,8 +17,8 @@ int main() {
         for (ll i = 2; i*i <= 2*N; ++i) {
             if (2*N % i == 0) {
                 if (i % 2 == 1 || (2*N/i) % 2 == 1) {
-                    min_k = min(i, min_k);
-                //    break;
+                    min_k = i;
+                    break;
                 }
             }
         }

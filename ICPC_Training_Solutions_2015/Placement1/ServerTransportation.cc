@@ -23,8 +23,6 @@ double d(ii p1, ii p2) {
 }
 
 int main() {
-    throw 2;
-    
     ll cases;
     cin >> cases;
 
