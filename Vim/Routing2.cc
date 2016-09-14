@@ -62,10 +62,9 @@ int main() {
 
                 if (curCost > cost[fwd][bwd]) continue;
 
-            //    cerr << start << " " << end << " " << curCost << endl;
-
                 if (fwd == 1 && bwd == 1) break;
 
+                // extend either the forward or backward path only
                 for (ll i = 0; i < N; ++i) {
                     ll newCost = curCost + dist[fwd][i];
                     push(pq, cost, i, bwd, newCost);
@@ -75,6 +74,8 @@ int main() {
                     push(pq, cost, fwd, i, newCost);
                 }
                 
+                // utilize the path in the same direction from fwd to bwd
+                // either swaping the two positions, or moving to one of them
                 if (fwd != bwd) {    
                     push(pq, cost, bwd, fwd, curCost+dist[fwd][bwd]-1);
                     push(pq, cost, bwd, bwd, curCost+dist[fwd][bwd]-1);
