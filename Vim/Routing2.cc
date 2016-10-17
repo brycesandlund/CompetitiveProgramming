@@ -78,7 +78,7 @@ int main() {
                 // either swaping the two positions, or moving to one of them
                 if (fwd != bwd) {    
                     push(pq, cost, bwd, fwd, curCost+dist[fwd][bwd]-1);
-                    push(pq, cost, bwd, bwd, curCost+dist[fwd][bwd]-1);
+                //    push(pq, cost, bwd, bwd, curCost+dist[fwd][bwd]-1);
                     push(pq, cost, fwd, fwd, curCost+dist[fwd][bwd]-1);
                 }
             }
