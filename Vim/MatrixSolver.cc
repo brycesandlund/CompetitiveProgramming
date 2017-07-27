@@ -84,20 +84,31 @@ size_t SolveLinearSystems( const VVT &A, const VVT &b, VVT &x, VB &has_sol ) {
 }
 
 int main() {
-    VVT A = {{1, 0, 0, 0, 0},
-             {.05, .1333, .2167, 0, 0},
-             {0, .0167, .1667, .0667, 0},
-             {0, 0, .0667, .2, .0333},
-             {0, 0, 0, 0, 1}};
-    VVT b = {{0}, {-5.026}, {-1.968}, {8.7295}, {0}};
+    VVT A = {{1, 1, 1, 1, 1},
+             {-2, -1, 0, 1, 2},
+             /*{2, .5, 0, .5, 2},*/
+             {-4.0/3, -1.0/6, 0, 1.0/6, 4.0/3},
+             {2.0/3, 1.0/24, 0, 1.0/24, 2.0/3}};
+    VVT b = {{0}, {1}, {0}, {0}, {0}};
     VVT x(5, VT(1));
 
+    GaussJordan(A);
+    for (ll i = 0; i < A.size(); ++i) {
+        for (ll j = 0; j < A[0].size(); ++j) {
+            cerr << A[i][j] << " ";
+        }
+        cerr << endl;
+    }
+
+
+    /*
     VB has_sol(5);
     SolveLinearSystems(A, b, x, has_sol);
     
     for (ll i = 0; i < 5; ++i) {
         cout << x[i][0] << endl;
     }
+    */
     
     return 0;
 }

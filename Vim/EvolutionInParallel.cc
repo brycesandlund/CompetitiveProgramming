@@ -25,7 +25,18 @@ bool lencompare(string a, string b) {
     return a.size() < b.size();
 }
 
+ll deep_recursion(ll n) {
+    if (n > 0)
+        return deep_recursion(n-1)+1;
+    else
+        return 0;
+}
+
 int main() {
+//    ll test = deep_recursion(1000000000000000LL);
+//    cout << test << endl;
+    
+    
     ll n;
     for (ll cs = 1; cin >> n; ++cs) {
         string final;
